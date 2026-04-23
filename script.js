@@ -133,16 +133,6 @@ function init() {
             updateUIZoom();
         }
     });
-}
-
-function updateUIZoom() {
-    previewContainer.style.setProperty('--ui-zoom', uiZoom);
-    if (!('zoom' in document.body.style)) {
-        previewContainer.style.transform = `scale(${uiZoom})`;
-        previewContainer.style.marginBottom = `${60 * uiZoom}px`;
-    }
-    previewZoomLevel.textContent = Math.round(uiZoom * 100) + '%';
-}
 
     nValueSelect.addEventListener('change', (e) => { nValue = parseInt(e.target.value); renderLayout(); });
     orientationSelect.addEventListener('change', (e) => { orientation = e.target.value; renderLayout(); });
@@ -165,6 +155,15 @@ function updateUIZoom() {
 
     btnExport.addEventListener('click', generateNIn1Pdf);
     btnPrint.addEventListener('click', generatePrintPdf); // high quality print instead of DOM print
+}
+
+function updateUIZoom() {
+    previewContainer.style.setProperty('--ui-zoom', uiZoom);
+    if (!('zoom' in document.body.style)) {
+        previewContainer.style.transform = `scale(${uiZoom})`;
+        previewContainer.style.marginBottom = `${60 * uiZoom}px`;
+    }
+    previewZoomLevel.textContent = Math.round(uiZoom * 100) + '%';
 }
 
 async function handleFile(file) {
