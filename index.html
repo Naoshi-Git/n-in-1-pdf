@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF N-in-1 Generator</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>">
+    <!-- pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <!-- pdf-lib -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loader"></div>
+        <p id="loading-text" style="font-weight: 500; font-size: 16px; margin-bottom: 8px;">PDFを解析中...</p>
+        <p id="loading-subtext" style="font-size: 13px; color: var(--text-muted);">少々お待ちください</p>
+        <div style="width: 240px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 20px; overflow: hidden;">
+            <div id="loading-progress-bar" style="width: 0%; height: 100%; background: var(--primary); transition: width 0.1s ease-out;"></div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Controls -->
+        <aside class="sidebar glass-panel">
+            <div class="brand">
+                <h1>N-in-1 PDF</h1>
+                <p>Advanced PDF Layout Tool</p>
+                <a href="guide.html" target="_blank" class="guide-link">📖 使い方ガイドを開く</a>
+            </div>
+
+            <div class="control-group">
+                <label>1. 入力ファイル</label>
+                <div id="drop-zone" class="drop-zone">
+                    <p>PDFをドラッグ＆ドロップ</p>
+                    <span>または</span>
+                    <label for="file-upload" class="btn-primary" style="display: inline-block;">ファイルを選択</label>
+                    <input type="file" id="file-upload" accept="application/pdf" hidden>
+                </div>
+                <div id="file-info" class="file-info hidden"></div>
+            </div>
+
+            <div class="control-group">
+                <label>2. レイアウト設定</label>
+                <div class="setting-row">
+                    <span>N-in-1</span>
+                    <select id="n-value">
+                        <option value="2">2-in-1</option>
+                        <option value="4" selected>4-in-1</option>
+                        <option value="6">6-in-1</option>
+                        <option value="8">8-in-1</option>
+                        <option value="9">9-in-1</option>
+                        <option value="16">16-in-1</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <span>用紙の向き</span>
+                    <select id="page-orientation">
+                        <option value="Portrait">縦 (Portrait)</option>
+                        <option value="Landscape">横 (Landscape)</option>
+                    </select>
+                </div>
+                
+                <div class="setting-row zoom-row">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <span>枠内ズーム倍率</span>
+                        <input type="number" id="zoom-input" value="1.00" step="0.05" min="0.10" max="3.00">
+                    </div>
+                    <input type="range" id="zoom-slider" min="0.10" max="3.00" step="0.05" value="1.00">
+                </div>
+            </div>
+
+            <div class="control-group" id="deleted-pages-group" style="display: none;">
+                <label>3. 除外されたページ</label>
+                <div id="deleted-pages-list" class="deleted-list">
+                    <!-- Deleted pages shown here -->
+                </div>
+            </div>
+
+            <div class="control-group" style="margin-top: auto;">
+                <label>出力</label>
+                <button id="btn-export" class="btn-primary" disabled>PDFとして書き出し</button>
+                <button id="btn-print" class="btn-secondary" disabled>高品質印刷 (別タブ)</button>
+            </div>
+        </aside>
+
+        <!-- Main Preview Area -->
+        <main class="preview-area">
+            <div id="preview-container" class="preview-container">
+                <div class="empty-state">
+                    PDFを読み込んでください
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toolbar Template for each page slot -->
+    <template id="slot-toolbar-template">
+        <div class="slot-toolbar">
+            <button class="tool-btn btn-skip" title="このページを除外">除外</button>
+            <button class="tool-btn btn-blank" title="前に空白ページを挿入">空白挿入</button>
+        </div>
+    </template>
+    
+    <template id="empty-slot-toolbar-template">
+        <div class="slot-toolbar">
+            <button class="tool-btn btn-remove-blank" title="空白を取り消す">元に戻す</button>
+        </div>
+    </template>
+
+    <script src="script.js"></script>
+</body>
+</html>
