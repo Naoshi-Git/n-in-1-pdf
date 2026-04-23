@@ -417,19 +417,28 @@ async function createFinalPdfBlob() {
             const drawY = y + (cellH - h) / 2;
 
             // スロットの枠でクリッピング（マスク）をかける
-            currentSheet.saveGraphicsState();
+            currentSheet.pushGraphicsState();
             currentSheet.drawRectangle({
                 x: x,
                 y: y,
                 width: cellW,
                 height: cellH,
                 borderWidth: 0,
-                opacity: 0, // 見えない枠をパスとして描画
+                opacity: 0,
             });
-            currentSheet.clip();
-            // クリックされた範囲内だけで描画を実行
+
+            // 低レベルオペレーターを使用してクリッピングを確定させる
+            // W: 枠をクリッピングパスに設定, n: パスを終了
+            const { PDFOperator } = window.PDFLib;
+            if (currentSheet.node && currentSheet.node.addContentStream) {
+                const clipOp = currentSheet.doc.context.register(PDFOperator.of('W'));
+                const endOp = currentSheet.doc.context.register(PDFOperator.of('n'));
+                currentSheet.node.addContentStream(clipOp);
+                currentSheet.node.addContentStream(endOp);
+            }
+
             currentSheet.drawPage(embeddedPage, { x: drawX, y: drawY, width: w, height: h });
-            currentSheet.restoreGraphicsState();
+            currentSheet.popGraphicsState();
         }
         
         currentProgress++;
