@@ -416,7 +416,20 @@ async function createFinalPdfBlob() {
             const drawX = x + (cellW - w) / 2;
             const drawY = y + (cellH - h) / 2;
 
+            // スロットの枠でクリッピング（マスク）をかける
+            currentSheet.saveGraphicsState();
+            currentSheet.drawRectangle({
+                x: x,
+                y: y,
+                width: cellW,
+                height: cellH,
+                borderWidth: 0,
+                opacity: 0, // 見えない枠をパスとして描画
+            });
+            currentSheet.clip();
+            // クリックされた範囲内だけで描画を実行
             currentSheet.drawPage(embeddedPage, { x: drawX, y: drawY, width: w, height: h });
+            currentSheet.restoreGraphicsState();
         }
         
         currentProgress++;
