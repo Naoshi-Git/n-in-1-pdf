@@ -32,6 +32,14 @@ const loadingTextEl = document.getElementById('loading-text');
 const loadingSubtextEl = document.getElementById('loading-subtext');
 const loadingBarEl = document.getElementById('loading-progress-bar');
 
+const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
+const appContainer = document.querySelector('.app-container');
+const btnZoomIn = document.getElementById('btn-preview-zoom-in');
+const btnZoomOut = document.getElementById('btn-preview-zoom-out');
+const previewZoomLevel = document.getElementById('preview-zoom-level');
+
+let uiZoom = 1.0;
+
 // grid configs
 const getGridConfig = (n, ori) => {
     n = parseInt(n);
@@ -107,6 +115,34 @@ function init() {
     fileInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files.length > 0) handleFile(e.target.files[0]);
     });
+
+    btnToggleSidebar.addEventListener('click', () => {
+        appContainer.classList.toggle('sidebar-collapsed');
+    });
+
+    btnZoomIn.addEventListener('click', () => {
+        if (uiZoom < 3.0) {
+            uiZoom = Math.min(3.0, uiZoom + 0.1);
+            updateUIZoom();
+        }
+    });
+
+    btnZoomOut.addEventListener('click', () => {
+        if (uiZoom > 0.3) {
+            uiZoom = Math.max(0.3, uiZoom - 0.1);
+            updateUIZoom();
+        }
+    });
+}
+
+function updateUIZoom() {
+    previewContainer.style.setProperty('--ui-zoom', uiZoom);
+    if (!('zoom' in document.body.style)) {
+        previewContainer.style.transform = `scale(${uiZoom})`;
+        previewContainer.style.marginBottom = `${60 * uiZoom}px`;
+    }
+    previewZoomLevel.textContent = Math.round(uiZoom * 100) + '%';
+}
 
     nValueSelect.addEventListener('change', (e) => { nValue = parseInt(e.target.value); renderLayout(); });
     orientationSelect.addEventListener('change', (e) => { orientation = e.target.value; renderLayout(); });
