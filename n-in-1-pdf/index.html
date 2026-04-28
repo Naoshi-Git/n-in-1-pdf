@@ -1,92 +1,146 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kon-Lab Web Tools</title>
-    <style>
-        body {
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1e1e1e;
-            color: #eee;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 50px 20px;
-            margin: 0;
-            min-height: 100vh;
-        }
-        h1 {
-            color: #fff;
-            margin-bottom: 50px;
-            border-bottom: 3px solid #0e639c;
-            padding-bottom: 10px;
-            font-size: 2.5rem;
-            letter-spacing: 0.05em;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 30px;
-            max-width: 900px;
-            width: 100%;
-        }
-        .card {
-            background-color: #252526;
-            border: 1px solid #444;
-            border-radius: 10px;
-            padding: 30px;
-            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-            text-decoration: none;
-            color: inherit;
-            display: flex;
-            flex-direction: column;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
-            border-color: #0e639c;
-        }
-        .card h2 {
-            margin-top: 0;
-            color: #4daafc;
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-        }
-        .card p {
-            color: #aaa;
-            line-height: 1.6;
-            flex-grow: 1;
-            margin-bottom: 25px;
-        }
-        .card .btn {
-            display: inline-block;
-            background-color: #0e639c;
-            color: white;
-            padding: 12px 20px;
-            text-align: center;
-            border-radius: 6px;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
-        .card:hover .btn {
-            background-color: #1177bb;
-        }
-    </style>
+    <title>PDF N-in-1 Generator</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>塘</text></svg>">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="N-in-1 PDF Layout Tool" />
+    <meta property="og:description" content="螳滄ｨ薙ヮ繝ｼ繝医↓繝励Ο繝医さ繝ｫ繧定・逕ｱ縺ｪ繝ｬ繧､繧｢繧ｦ繝医〒雋ｼ繧贋ｻ倥￠縺溘＞窶披斐◎繧薙↑迴ｾ蝣ｴ縺ｮ繝九・繧ｺ縺九ｉ逕溘∪繧後◆縲￣DF邨仙粋繝ｻN蛻・牡繝・・繝ｫ縲り､・焚繝壹・繧ｸ縺ｮPDF繧定・逕ｱ縺ｫN蛻・牡繝ｬ繧､繧｢繧ｦ繝医〒驟咲ｽｮ縺励・ｫ倡判雉ｪ縺ｪPDF縺ｨ縺励※譖ｸ縺榊・縺帙∪縺吶・ />
+    <meta property="og:image" content="https://naoshi-git.github.io/n-in-1-pdf/favicon.png" />
+    <meta property="og:url" content="https://naoshi-git.github.io/n-in-1-pdf/" />
+    <meta property="og:type" content="website" />
+    <!-- pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <!-- pdf-lib -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Kon-Lab Web Tools</h1>
-    <div class="grid">
-        <a href="n-in-1-pdf/" class="card">
-            <h2>N-in-1 PDF</h2>
-            <p>複数ページのPDFを指定したレイアウト（N-in-1）で結合・配置するツール。柔軟なクリッピングやマージン調整が可能です。</p>
-            <div class="btn">Launch App</div>
-        </a>
-        <a href="tiff-annotator/" class="card">
-            <h2>TIFF Annotator</h2>
-            <p>TIFFやJPEG画像に直接アノテーション（打点）を行い、色別のカウントや配置調整を行ってJPEGで書き出せる画像処理ツール。</p>
-            <div class="btn">Launch App</div>
-        </a>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loader"></div>
+        <p id="loading-text" style="font-weight: 500; font-size: 16px; margin-bottom: 8px;">PDF繧定ｧ｣譫蝉ｸｭ...</p>
+        <p id="loading-subtext" style="font-size: 13px; color: var(--text-muted);">蟆代・♀蠕・■縺上□縺輔＞</p>
+        <div style="width: 240px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 20px; overflow: hidden;">
+            <div id="loading-progress-bar" style="width: 0%; height: 100%; background: var(--primary); transition: width 0.1s ease-out;"></div>
+        </div>
     </div>
+
+    <div class="app-container">
+        <!-- Sidebar Controls -->
+        <aside class="sidebar glass-panel">
+            <div class="brand">
+                <h1>N-in-1 PDF</h1>
+                <p>Advanced PDF Layout Tool</p>
+                <a href="guide.html" target="_blank" class="guide-link">当 菴ｿ縺・婿繧ｬ繧､繝峨ｒ髢九￥</a>
+            </div>
+
+            <div class="control-group">
+                <label>1. 蜈･蜉帙ヵ繧｡繧､繝ｫ</label>
+                <div id="drop-zone" class="drop-zone">
+                    <p>PDF繧偵ラ繝ｩ繝・げ・・ラ繝ｭ繝・・</p>
+                    <span>縺ｾ縺溘・</span>
+                    <label for="file-upload" class="btn-primary" style="display: inline-block;">繝輔ぃ繧､繝ｫ繧帝∈謚・/label>
+                    <input type="file" id="file-upload" accept="application/pdf" hidden>
+                </div>
+                <div id="file-info" class="file-info hidden"></div>
+            </div>
+
+            <div class="control-group">
+                <label>2. 繝ｬ繧､繧｢繧ｦ繝郁ｨｭ螳・/label>
+                <div class="setting-row">
+                    <span>N-in-1</span>
+                    <select id="n-value">
+                        <option value="2">2-in-1</option>
+                        <option value="4" selected>4-in-1</option>
+                        <option value="6">6-in-1</option>
+                        <option value="8">8-in-1</option>
+                        <option value="9">9-in-1</option>
+                        <option value="16">16-in-1</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <span>逕ｨ邏吶・蜷代″</span>
+                    <select id="page-orientation">
+                        <option value="Portrait">邵ｦ (Portrait)</option>
+                        <option value="Landscape">讓ｪ (Landscape)</option>
+                    </select>
+                </div>
+                
+                <div class="setting-row zoom-row">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <span>譫蜀・ぜ繝ｼ繝蛟咲紫</span>
+                        <input type="number" id="zoom-input" value="1.00" step="0.05" min="0.10" max="3.00">
+                    </div>
+                    <input type="range" id="zoom-slider" min="0.10" max="3.00" step="0.05" value="1.00">
+                </div>
+            </div>
+
+            <div class="control-group" id="deleted-pages-group" style="display: none;">
+                <label>3. 髯､螟悶＆繧後◆繝壹・繧ｸ</label>
+                <div id="deleted-pages-list" class="deleted-list">
+                    <!-- Deleted pages shown here -->
+                </div>
+            </div>
+
+            <div class="control-group" style="margin-top: auto;">
+                <label>蜃ｺ蜉・/label>
+                <button id="btn-export" class="btn-primary" disabled>PDF縺ｨ縺励※譖ｸ縺榊・縺・/button>
+                <button id="btn-print" class="btn-secondary" disabled>鬮伜刀雉ｪ蜊ｰ蛻ｷ (蛻･繧ｿ繝・</button>
+            </div>
+        </aside>
+
+        <!-- Main Preview Area -->
+        <main class="preview-area">
+            <!-- Top App Bar -->
+            <div class="top-app-bar">
+                <button id="btn-toggle-sidebar" class="icon-button" title="繝｡繝九Η繝ｼ繧帝幕髢・>
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+                <div class="preview-zoom-controls">
+                    <button id="btn-preview-zoom-out" class="icon-button" title="邵ｮ蟆・>
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+                    <span id="preview-zoom-level">100%</span>
+                    <button id="btn-preview-zoom-in" class="icon-button" title="諡｡螟ｧ">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="preview-scroll-area">
+                <div id="preview-container" class="preview-container">
+                    <div class="empty-state">
+                        PDF繧定ｪｭ縺ｿ霎ｼ繧薙〒縺上□縺輔＞
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toolbar Template for each page slot -->
+    <template id="slot-toolbar-template">
+        <div class="slot-toolbar">
+            <button class="tool-btn btn-skip" title="縺薙・繝壹・繧ｸ繧帝勁螟・>髯､螟・/button>
+            <button class="tool-btn btn-blank" title="蜑阪↓遨ｺ逋ｽ繝壹・繧ｸ繧呈諺蜈･">遨ｺ逋ｽ謖ｿ蜈･</button>
+        </div>
+    </template>
+    
+    <template id="empty-slot-toolbar-template">
+        <div class="slot-toolbar">
+            <button class="tool-btn btn-remove-blank" title="遨ｺ逋ｽ繧貞叙繧頑ｶ医☆">蜈・↓謌ｻ縺・/button>
+        </div>
+    </template>
+
+    <script src="script.js"></script>
 </body>
 </html>

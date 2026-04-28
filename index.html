@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kon-Lab Web Tools</title>
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+            color: #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #fff;
+            margin-bottom: 50px;
+            border-bottom: 3px solid #0e639c;
+            padding-bottom: 10px;
+            font-size: 2.5rem;
+            letter-spacing: 0.05em;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 900px;
+            width: 100%;
+        }
+        .card {
+            background-color: #252526;
+            border: 1px solid #444;
+            border-radius: 10px;
+            padding: 30px;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            border-color: #0e639c;
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #4daafc;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        .card p {
+            color: #aaa;
+            line-height: 1.6;
+            flex-grow: 1;
+            margin-bottom: 25px;
+        }
+        .card .btn {
+            display: inline-block;
+            background-color: #0e639c;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .card:hover .btn {
+            background-color: #1177bb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Kon-Lab Web Tools</h1>
+    <div class="grid">
+        <a href="n-in-1-pdf/" class="card">
+            <h2>N-in-1 PDF</h2>
+            <p>複数ページのPDFを指定したレイアウト（N-in-1）で結合・配置するツール。柔軟なクリッピングやマージン調整が可能です。</p>
+            <div class="btn">Launch App</div>
+        </a>
+        <a href="tiff-annotator/" class="card">
+            <h2>TIFF Annotator</h2>
+            <p>TIFFやJPEG画像に直接アノテーション（打点）を行い、色別のカウントや配置調整を行ってJPEGで書き出せる画像処理ツール。</p>
+            <div class="btn">Launch App</div>
+        </a>
+    </div>
+</body>
+</html>
