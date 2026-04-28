@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIFF Annotator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <h2>TIFF Annotator</h2>
+            </div>
+            
+            <div class="panel">
+                <h3>Image Input</h3>
+                <div id="drop-zone">
+                    <p>Drag & Drop image here<br>or click to select</p>
+                    <input type="file" id="file-input" accept=".tif,.tiff,.jpg,.jpeg,.png">
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Tools</h3>
+                <div class="control-group">
+                    <label>Colors</label>
+                    <div id="color-palette">
+                        <button class="color-btn active" data-color="#ff0000" style="background-color: #ff0000;" title="Red"></button>
+                        <button class="color-btn" data-color="#0000ff" style="background-color: #0000ff;" title="Blue"></button>
+                        <button class="color-btn" data-color="#ffff00" style="background-color: #ffff00;" title="Yellow"></button>
+                        <button class="color-btn" data-color="#ffa500" style="background-color: #ffa500;" title="Orange"></button>
+                        <button class="color-btn" data-color="#008000" style="background-color: #008000;" title="Green"></button>
+                        <div class="custom-color-wrapper" id="custom-color-btn" title="Custom Color">
+                            <input type="color" id="custom-color" class="custom-color-picker" value="#ff00ff">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Circle Radius (<span id="radius-val">10</span>px)</label>
+                    <input type="range" id="radius-slider" min="2" max="100" value="10">
+                </div>
+
+                <div class="control-group">
+                    <label>Line Thickness (<span id="thickness-val">2</span>px)</label>
+                    <input type="range" id="thickness-slider" min="1" max="20" value="2">
+                </div>
+
+                <div class="control-group">
+                    <label>Text Size (<span id="textsize-val">16</span>px)</label>
+                    <input type="range" id="textsize-slider" min="10" max="60" value="16">
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Statistics / Tags</h3>
+                <div id="stats-container">
+                    <div style="color: #666; font-style: italic;">No annotations</div>
+                </div>
+            </div>
+
+            <div class="panel actions">
+                <button id="export-btn" class="primary-btn">Export JPEG</button>
+            </div>
+            
+            <div class="instructions">
+                <div class="instruction-title">Controls</div>
+                <div class="instruction-item">
+                    <span class="key-combo"><kbd>Left Click</kbd></span>
+                    <span class="instruction-desc">Add / Replace Color</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="key-combo"><kbd>Left Drag</kbd></span>
+                    <span class="instruction-desc">Move Circle</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="key-combo"><kbd>Right Click</kbd></span>
+                    <span class="instruction-desc">Delete Nearest</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="key-combo"><kbd>Wheel</kbd></span>
+                    <span class="instruction-desc">Zoom</span>
+                </div>
+                <div class="instruction-item">
+                    <span class="key-combo"><kbd>Mid Drag</kbd> / <kbd>Shift</kbd>+<kbd>Drag</kbd></span>
+                    <span class="instruction-desc">Pan Image</span>
+                </div>
+            </div>
+        </aside>
+
+        <main id="main-view">
+            <div id="canvas-container">
+                <canvas id="main-canvas"></canvas>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
