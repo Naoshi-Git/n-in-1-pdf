@@ -10,6 +10,7 @@ let deletedPages = []; // { pageIndex: number, originalOrder: number }
 let nValue = 4;
 let orientation = 'Portrait';
 let globalScale = 1.0;
+let layoutDirection = 'row';
 let pageCache = {}; // index -> Object URL (JPEG Blob)
 
 // DOM Elements
@@ -37,6 +38,13 @@ const appContainer = document.querySelector('.app-container');
 const btnZoomIn = document.getElementById('btn-preview-zoom-in');
 const btnZoomOut = document.getElementById('btn-preview-zoom-out');
 const previewZoomLevel = document.getElementById('preview-zoom-level');
+
+// New Settings Elements
+const layoutDirectionSelect = document.getElementById('layout-direction');
+const presetSelect = document.getElementById('preset-select');
+const presetNameInput = document.getElementById('preset-name');
+const btnSavePreset = document.getElementById('btn-save-preset');
+const btnDeletePreset = document.getElementById('btn-delete-preset');
 
 let uiZoom = 1.0;
 
@@ -136,6 +144,37 @@ function init() {
 
     nValueSelect.addEventListener('change', (e) => { nValue = parseInt(e.target.value); renderLayout(); });
     orientationSelect.addEventListener('change', (e) => { orientation = e.target.value; renderLayout(); });
+    layoutDirectionSelect.addEventListener('change', (e) => { layoutDirection = e.target.value; renderLayout(); });
+    
+    // Presets
+    loadPresets();
+    presetSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val) {
+            applyPreset(val);
+            presetNameInput.value = val;
+            btnDeletePreset.style.display = 'inline-block';
+        } else {
+            presetNameInput.value = '';
+            btnDeletePreset.style.display = 'none';
+        }
+    });
+
+    btnSavePreset.addEventListener('click', () => {
+        const name = presetNameInput.value.trim();
+        if (!name) {
+            alert('プリセット名を入力してください。');
+            return;
+        }
+        savePreset(name);
+    });
+
+    btnDeletePreset.addEventListener('click', () => {
+        const name = presetNameInput.value.trim();
+        if (name && confirm(`プリセット「${name}」を削除しますか？`)) {
+            deletePreset(name);
+        }
+    });
     
     // Zoom sync and apply
     zoomScaleSlider.addEventListener('input', (e) => {
@@ -155,6 +194,67 @@ function init() {
 
     btnExport.addEventListener('click', generateNIn1Pdf);
     btnPrint.addEventListener('click', generatePrintPdf); // high quality print instead of DOM print
+}
+
+// Presets Functions
+function loadPresets() {
+    let presets = JSON.parse(localStorage.getItem('nIn1Presets')) || {};
+    
+    if (Object.keys(presets).length === 0) {
+        presets['デフォルト'] = { nValue: 4, orientation: 'Portrait', layoutDirection: 'row', globalScale: 1.0 };
+        localStorage.setItem('nIn1Presets', JSON.stringify(presets));
+    }
+    
+    presetSelect.innerHTML = '<option value="">-- 保存済みの設定 --</option>';
+    for (const name in presets) {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        presetSelect.appendChild(opt);
+    }
+}
+
+function applyPreset(name) {
+    const presets = JSON.parse(localStorage.getItem('nIn1Presets')) || {};
+    const preset = presets[name];
+    if (preset) {
+        nValue = preset.nValue || 4;
+        orientation = preset.orientation || 'Portrait';
+        layoutDirection = preset.layoutDirection || 'row';
+        globalScale = preset.globalScale || 1.0;
+        
+        nValueSelect.value = nValue;
+        orientationSelect.value = orientation;
+        layoutDirectionSelect.value = layoutDirection;
+        zoomScaleSlider.value = globalScale;
+        zoomScaleInput.value = globalScale.toFixed(2);
+        
+        updateScaleCSS();
+        renderLayout();
+    }
+}
+
+function savePreset(name) {
+    const presets = JSON.parse(localStorage.getItem('nIn1Presets')) || {};
+    presets[name] = {
+        nValue: nValue,
+        orientation: orientation,
+        layoutDirection: layoutDirection,
+        globalScale: globalScale
+    };
+    localStorage.setItem('nIn1Presets', JSON.stringify(presets));
+    loadPresets();
+    presetSelect.value = name;
+    btnDeletePreset.style.display = 'inline-block';
+}
+
+function deletePreset(name) {
+    const presets = JSON.parse(localStorage.getItem('nIn1Presets')) || {};
+    delete presets[name];
+    localStorage.setItem('nIn1Presets', JSON.stringify(presets));
+    loadPresets();
+    presetNameInput.value = '';
+    btnDeletePreset.style.display = 'none';
 }
 
 function updateUIZoom() {
@@ -285,6 +385,7 @@ async function renderLayout() {
         sheetEl.style.height = `${sheetVisualHeight}px`;
         sheetEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
         sheetEl.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+        sheetEl.style.gridAutoFlow = layoutDirection;
 
         for (let i = 0; i < slotsPerSheet; i++) {
             const mapIndex = s * slotsPerSheet + i;
@@ -455,8 +556,15 @@ async function createFinalPdfBlob() {
         if (item.type === 'page') {
             const embeddedPage = indexMap[item.pageIndex];
             
-            const col = indexInSheet % cols;
-            const row = Math.floor(indexInSheet / cols);
+            let col, row;
+            if (layoutDirection === 'column') {
+                col = Math.floor(indexInSheet / rows);
+                row = indexInSheet % rows;
+            } else {
+                col = indexInSheet % cols;
+                row = Math.floor(indexInSheet / cols);
+            }
+            
             const x = col * cellW;
             const y = PAGE_HEIGHT - (row + 1) * cellH; 
 

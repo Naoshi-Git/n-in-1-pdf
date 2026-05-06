@@ -75,6 +75,13 @@
                         <option value="Landscape">横 (Landscape)</option>
                     </select>
                 </div>
+                <div class="setting-row">
+                    <span>配置順</span>
+                    <select id="layout-direction">
+                        <option value="row">Z型 (左→右→下)</option>
+                        <option value="column">N型 (上→下→右)</option>
+                    </select>
+                </div>
                 
                 <div class="setting-row zoom-row">
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -85,8 +92,22 @@
                 </div>
             </div>
 
+            <div class="control-group">
+                <label>3. プリセット</label>
+                <div class="setting-row">
+                    <select id="preset-select" style="flex: 1;">
+                        <option value="">-- 保存済みの設定 --</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="preset-name" placeholder="新しい設定名" style="flex: 1; width: 0;">
+                    <button id="btn-save-preset" class="btn-secondary" style="padding: 6px 12px; font-size: 12px;">保存</button>
+                    <button id="btn-delete-preset" class="btn-secondary" style="padding: 6px 12px; font-size: 12px; color: var(--danger); border-color: var(--danger); display: none;">削除</button>
+                </div>
+            </div>
+
             <div class="control-group" id="deleted-pages-group" style="display: none;">
-                <label>3. 除外されたページ</label>
+                <label>4. 除外されたページ</label>
                 <div id="deleted-pages-list" class="deleted-list">
                     <!-- Deleted pages shown here -->
                 </div>
