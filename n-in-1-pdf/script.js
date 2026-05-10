@@ -637,48 +637,6 @@ async function createFinalPdfBlob() {
         
         if (indexInSheet === 0) {
             currentSheet = finalDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-            
-            // Draw Dividers
-            if (dividerMode !== 'none') {
-                const sheetIdx = Math.floor(i / (cols * rows));
-                let gridOriginX = 0;
-                let gridOriginY = 0;
-                
-                if (orientation === 'Portrait') {
-                    if (sheetIdx % 2 === 0) gridOriginX = marginPt;
-                } else {
-                    if (sheetIdx % 2 !== 0) gridOriginY = marginPt;
-                }
-
-                const color = window.PDFLib.rgb(0.5, 0.5, 0.5);
-                const thickness = 0.5;
-                const drawV = (dividerMode === 'all' || dividerMode === 'vertical' || dividerMode === 'inner');
-                const drawH = (dividerMode === 'all' || dividerMode === 'horizontal' || dividerMode === 'inner');
-                
-                if (drawV) {
-                    for (let c = 0; c <= cols; c++) {
-                        if (dividerMode === 'inner' && (c === 0 || c === cols)) continue;
-                        const lx = gridOriginX + c * cellW;
-                        currentSheet.drawLine({
-                            start: { x: lx, y: gridOriginY },
-                            end: { x: lx, y: gridOriginY + printableH },
-                            thickness, color
-                        });
-                    }
-                }
-                
-                if (drawH) {
-                    for (let r = 0; r <= rows; r++) {
-                        if (dividerMode === 'inner' && (r === 0 || r === rows)) continue;
-                        const ly = gridOriginY + r * cellH;
-                        currentSheet.drawLine({
-                            start: { x: gridOriginX, y: ly },
-                            end: { x: gridOriginX + printableW, y: ly },
-                            thickness, color
-                        });
-                    }
-                }
-            }
         }
 
         if (item.type === 'page') {
@@ -717,6 +675,50 @@ async function createFinalPdfBlob() {
         if (currentProgress % 5 === 0) {
             await new Promise(r => setTimeout(r, 0));
         }
+    }
+
+    // Draw dividers after all pages are drawn to act as an overlay
+    if (dividerMode !== 'none') {
+        const pages = finalDoc.getPages();
+        const color = window.PDFLib.rgb(0.5, 0.5, 0.5);
+        const thickness = 0.5;
+        const drawV = (dividerMode === 'all' || dividerMode === 'vertical' || dividerMode === 'inner');
+        const drawH = (dividerMode === 'all' || dividerMode === 'horizontal' || dividerMode === 'inner');
+        
+        pages.forEach((page, sheetIdx) => {
+            let gridOriginX = 0;
+            let gridOriginY = 0;
+            
+            if (orientation === 'Portrait') {
+                if (sheetIdx % 2 === 0) gridOriginX = marginPt;
+            } else {
+                if (sheetIdx % 2 !== 0) gridOriginY = marginPt;
+            }
+            
+            if (drawV) {
+                for (let c = 0; c <= cols; c++) {
+                    if (dividerMode === 'inner' && (c === 0 || c === cols)) continue;
+                    const lx = gridOriginX + c * cellW;
+                    page.drawLine({
+                        start: { x: lx, y: gridOriginY },
+                        end: { x: lx, y: gridOriginY + printableH },
+                        thickness, color
+                    });
+                }
+            }
+            
+            if (drawH) {
+                for (let r = 0; r <= rows; r++) {
+                    if (dividerMode === 'inner' && (r === 0 || r === rows)) continue;
+                    const ly = gridOriginY + r * cellH;
+                    page.drawLine({
+                        start: { x: gridOriginX, y: ly },
+                        end: { x: gridOriginX + printableW, y: ly },
+                        thickness, color
+                    });
+                }
+            }
+        });
     }
 
     const pdfBytes = await finalDoc.save();
